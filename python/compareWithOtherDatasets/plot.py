@@ -134,7 +134,10 @@ from matplotlib import rcParams
 '''
 
 
-def ShowtJittrLagValue():
+def ShowtJittrLagValue(save_path):
+    # 设置全局字体
+    plt.rcParams["font.family"] = "Times New Roman"
+
     colors = ['gray', 
               (np.float64(0.8392156862745098), np.float64(0.15294117647058825), np.float64(0.1568627450980392), np.float64(1.0)), 
               (np.float64(0.5803921568627451), np.float64(0.403921568627451), np.float64(0.7411764705882353), np.float64(1.0)), 
@@ -142,59 +145,87 @@ def ShowtJittrLagValue():
               'y', 'b', 'c', 'g', 'r', (1.0, 0.647, 0.0), 'm']
     
     labels = ['ShapeNet', 'ModelNet', '3D-Future', 'ABO', 'Toys4K', 'CO3D', 'ScanObjectNN', 'GSO', 'AKB-48', 'OmniObject3D', 'Ours']
-    tLag = [55, 40, 34, 63, 105, 50, 15, 17, 48, 190, 1156]
-    tSmt = [5.1, 1.2, 1.6, 0.8, 0.4, 1.9, 1.5, 0.1, 0.2, 0.6, 4.6]
+    '''tLag = [55, 40, 34, 63, 105, 50, 15, 17, 48, 190, 1054]
+    # tLag = [0.055, 0.040, 0.034, 0.063, 0.105, 0.050, 0.015, 0.017, 0.048, 0.190, 1.054]
+    tSmt = [51, 12, 16, 8, 4, 19, 15, 1, 2, 6, 33]'''
+    tSmt= [0.055, 0.040, 0.034, 0.063, 0.105, 0.050, 0.015, 0.017, 0.048, 0.190, 1.054]
+    tLag = [51, 12, 16, 8, 4, 19, 15, 1, 2, 6, 33]
 
-    # 更新配置
+    # 估计得到的我们的类别和对应的个数(1054, 32,922)
+
+    '''# 更新配置
     config = {
         "font.family": 'Times New Roman',
-        "font.size": 14,  # 字体变大
+        "font.size": 30,  # 字体变大
         "mathtext.fontset": 'stix',
         "font.serif": ['SimSun'],
     }
-    rcParams.update(config)
+    rcParams.update(config)'''
     
     # 设置替代红色的颜色
     alternate_color = 'purple'
     
     # 调整图片尺寸，适当增加高度给图例留出空间
-    plt.figure(figsize=(12, 8))  # 宽度12，高度8，适当增加高度
+    # plt.figure(figsize=(8, 7))  # 宽度12，高度8，适当增加高度 (16.09, 12.67)
+    plt.figure(figsize=(12, 7.5)) 
     
+    # 归一化的tlag
+    tLag_min = min(tLag)
+    tLag_max = max(tLag)
+    tLag_normalized = [(x - tLag_min) / (tLag_max - tLag_min) for x in tLag]
+
     for i in range(len(tSmt)):
         ax = plt.gca()
+        # 根据tLag的值动态设置点的大小（可以通过缩放因子来调整）
+        point_size = np.log(tLag_normalized[i] + 1)*1000  # tLag[i] *3  # 可根据需要调整分母以缩放大小
         # 如果是 "Ours"，使用红色五角星，并在下面加上标签
         if labels[i] == 'Ours':
-            plt.scatter(tSmt[i], tLag[i], color='r', marker='*', s=300, label=labels[i])  # 点大小增加
-            plt.text(tSmt[i], tLag[i] - 90, labels[i], fontsize=16, color='r', weight='bold', ha='center')  # 显示"Ours"在星星下面，增加空隙
+            plt.scatter(tSmt[i], tLag[i], color='r', marker='*', s=500, label=labels[i])  # 点大小增加 s=500  s=point_size
+            plt.text(tSmt[i]- 90, tLag[i] , labels[i], fontsize=16, color='r', weight='bold', ha='center')  # 显示"Ours"在星星下面，增加空隙
         else:
             # 如果颜色是红色，则替换为 alternate_color
             current_color = colors[i]
             if current_color == 'r' or (isinstance(current_color, tuple) and current_color[0] > 0.8 and current_color[1] < 0.2 and current_color[2] < 0.2):
                 current_color = alternate_color
-            plt.scatter(tSmt[i], tLag[i], color=current_color, s=180, label=labels[i])  # 点大小增加
+            plt.scatter(tSmt[i], tLag[i], color=current_color, s=300, label=labels[i])  # 点大小增加  s=300  s=point_size
         
-        plt.ylabel('Classes', fontsize=18)
-        plt.xlabel('Objects (10k)', fontsize=18)
-        plt.xticks(fontsize=16)
-        plt.yticks(fontsize=16)
+        plt.ylabel('Classes (k)', fontsize=30)
+        plt.xlabel('Objects (k)', fontsize=30)
+        plt.xticks(fontsize=30)
+        plt.yticks(fontsize=30)
 
-    # 调整图例栏，放到图外的正下方，变成两行，并且宽度和图对齐
+    '''# 调整图例栏，放到图外的正下方，变成两行，并且宽度和图对齐
     plt.legend(
-        ncol=6,  # 设置为三列
+        ncol=4,  # 设置为三列
         fontsize=14,  # 字体大小
         scatterpoints=1,  # 图例中的点大小
         loc='upper center',  # 图例放在图的下方中央
-        bbox_to_anchor=(0.5, -0.15),  # 调整到图外的正下方
+        bbox_to_anchor=(0.5, -0.2),  # 调整到图外的正下方  (0.5, -0.2)
         frameon=False  # 去掉图例的边框
-    )
-    
+    )'''
+
+    # Remove x-axis tick lines
+    plt.tick_params(axis='x', which='both', bottom=False)
+    plt.tick_params(axis='y', which='both', left=False)
+
+    # 设置刻度值
+    plt.xticks([0.0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2])
+    # plt.yticks([0, 15, 30, 45, 60])
+    plt.yticks([0, 20, 40, 60])
+
     plt.grid(True)
-    plt.tight_layout(rect=[0, 0, 1, 0.9])  # 调整图形布局，给图例留出空间
-    plt.show()
+    # plt.tight_layout(rect=[0, 0, 1, 0.9])  # 调整图形布局，给图例留出空间
+
+    plt.savefig(save_path, format='png', dpi=300)  # Save as PNG with high resolution
+    plt.close()  # Close the figure to free memory
+    # plt.show()
+    print(f"Saved the plot to {save_path}")
+
 
 
 if __name__ == "__main__":
-    ShowtJittrLagValue()
+    output_path = 'E:/projects/Canonicalization-Objaverse/result/compareWithOtherDatasets/comparedPic.png'
+    ShowtJittrLagValue(output_path)
     '''# 使用 colormap 生成新的颜色
     num_new_colors = 10  # 生成 7 到 11 个新颜色，这里我们选择生成10个
     cmap = plt.get_cmap('tab20')  # 'tab20' 是一种分布较好的颜色映射

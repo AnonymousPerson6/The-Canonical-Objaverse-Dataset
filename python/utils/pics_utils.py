@@ -65,6 +65,7 @@ def merge_images2Row(*images_or_paths, spacing=10, output_pic_path=None):
     """
     images = []
 
+
     # 处理输入，判断是图像路径还是Image对象
     for item in images_or_paths[0]:
         if isinstance(item, str) and os.path.exists(item):  # 如果是路径且文件存在
